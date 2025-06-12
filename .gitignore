@@ -1,0 +1,5 @@
+/data/step
+/data/labeled_graph
+/data/stp_model_validation.log
+__pychahed__/
+*.pyc

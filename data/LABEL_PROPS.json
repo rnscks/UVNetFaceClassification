@@ -1,0 +1,156 @@
+{
+    "LABEL_NAMES": [
+        "chamfer",
+        "through_hole",
+        "triangular_passage",
+        "rectangular_passage",
+        "6sides_passage",
+        "triangular_through_slot",
+        "rectangular_through_slot",
+        "circular_through_slot",
+        "rectangular_through_step",
+        "2sides_through_step",
+        "slanted_through_step",
+        "Oring",
+        "blind_hole",
+        "triangular_pocket",
+        "rectangular_pocket",
+        "6sides_pocket",
+        "circular_end_pocket",
+        "rectangular_blind_slot",
+        "v_circular_end_blind_slot",
+        "h_circular_end_blind_slot",
+        "triangular_blind_step",
+        "circular_blind_step",
+        "rectangular_blind_step",
+        "round",
+        "stock"
+    ],
+    "LABEL_COLORS": {
+        "chamfer": [
+            255,
+            0,
+            255
+        ],
+        "through_hole": [
+            255,
+            0,
+            0
+        ],
+        "triangular_passage": [
+            0,
+            255,
+            0
+        ],
+        "rectangular_passage": [
+            0,
+            0,
+            255
+        ],
+        "6sides_passage": [
+            255,
+            255,
+            0
+        ],
+        "triangular_through_slot": [
+            255,
+            165,
+            0
+        ],
+        "rectangular_through_slot": [
+            0,
+            255,
+            255
+        ],
+        "circular_through_slot": [
+            128,
+            0,
+            128
+        ],
+        "rectangular_through_step": [
+            255,
+            105,
+            180
+        ],
+        "2sides_through_step": [
+            128,
+            128,
+            0
+        ],
+        "slanted_through_step": [
+            0,
+            128,
+            128
+        ],
+        "Oring": [
+            70,
+            130,
+            180
+        ],
+        "blind_hole": [
+            255,
+            20,
+            147
+        ],
+        "triangular_pocket": [
+            124,
+            252,
+            0
+        ],
+        "rectangular_pocket": [
+            0,
+            0,
+            139
+        ],
+        "6sides_pocket": [
+            255,
+            215,
+            0
+        ],
+        "circular_end_pocket": [
+            139,
+            0,
+            0
+        ],
+        "rectangular_blind_slot": [
+            0,
+            255,
+            127
+        ],
+        "v_circular_end_blind_slot": [
+            255,
+            69,
+            0
+        ],
+        "h_circular_end_blind_slot": [
+            75,
+            0,
+            130
+        ],
+        "triangular_blind_step": [
+            138,
+            43,
+            226
+        ],
+        "circular_blind_step": [
+            64,
+            224,
+            208
+        ],
+        "rectangular_blind_step": [
+            173,
+            255,
+            47
+        ],
+        "round": [
+            112,
+            128,
+            144
+        ],
+        "stock": [
+            105,
+            105,
+            105
+        ]
+    }
+}
