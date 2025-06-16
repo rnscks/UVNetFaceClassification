@@ -143,7 +143,10 @@ class TurningMachiningModelGenerator:
         self.stock_model = fillet.Shape()
         return
     
-    def set_grooving_S(self, height: float=5.0, depth: float=0.5, width: float=1.0) -> None:        
+    def set_grooving_S(self, 
+                       height: float=5.0, 
+                       depth: float=0.5, 
+                       width: float=1.0) -> None:        
         groove_center = gp_Pnt(
             self.origin.X(),
             self.origin.Y(), 
