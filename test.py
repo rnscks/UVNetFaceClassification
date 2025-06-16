@@ -29,11 +29,9 @@ def test(stp_model_path: str = '',
     
     preds = F.softmax(out, dim=-1)  
     _, max_preds = torch.max(preds, 1)  # [num_faces, num_classes]
-    print(f"Predicted labels: {max_preds}")
-
     for idx, face in enumerate(labeled_face.keys()):
         labeled_face[face] = max_preds[idx].item()   
-    
+    print(f"Number of labeled faces: {len(labeled_face)}")
     display_labeled_face(
         labeled_faces=labeled_face,
         props_file_path='data/LABEL_PROPS.json',
@@ -73,6 +71,6 @@ def test_labeled(stp_model_path: str = ''):
     
 if __name__ == "__main__":
     test(
-        stp_model_path='data/demo/original/삼성전자/shaft.stp',
+        stp_model_path='data/demo/original/현대위아/SADDLE.stp',
         model_path='data/trained_model/uvnet_gat.pth',
         gnn_module=GAT())

@@ -97,35 +97,40 @@ def train_uvnet(
 
 
 if __name__ == "__main__":
+    # stp_file_path = 'data/step'
+    # save_file_path = 'data/labeled_graph'
     
-    stp_file_path = 'data/step'
-    save_file_path = 'data/labeled_graph'
-    
-    PreprocessUVGraph.preprocss(
-        stp_dir_path=stp_file_path,
-        save_dir_path=save_file_path
-    )
-    dataset = GraphDataset('data/labeled_graph')
-    train_size = int(0.8 * len(dataset))
-    val_size = len(dataset) - train_size
-    print(f"Train size: {train_size}, Validation size: {val_size}")
-    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+    # PreprocessUVGraph.preprocss(
+    #     stp_dir_path=stp_file_path,
+    #     save_dir_path=save_file_path
+    # )
+    # dataset = GraphDataset('data/labeled_graph')
+    # train_size = int(0.8 * len(dataset))
+    # val_size = len(dataset) - train_size
+    # print(f"Train size: {train_size}, Validation size: {val_size}")
+    # train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
 
-    train_uvnet(
-        train_dataset=train_dataset,
-        val_dataset=val_dataset,
-        result_path='GCN.xlsx',
-        model_path='uvnet_gcn.pth',
-        gnn=GCN())
-    train_uvnet(
-        train_dataset=train_dataset,
-        val_dataset=val_dataset,
-        result_path='SAGE.xlsx',
-        model_path='uvnet_sage.pth',
-        gnn=SAGE()) 
-    train_uvnet(    
-        train_dataset=train_dataset,
-        val_dataset=val_dataset,
-        result_path='GAT.xlsx',
-        model_path='uvnet_gat.pth',
-        gnn=GAT())
+    # train_uvnet(
+    #     train_dataset=train_dataset,
+    #     val_dataset=val_dataset,
+    #     result_path='GCN.xlsx',
+    #     model_path='uvnet_gcn.pth',
+    #     gnn=GCN())
+    # train_uvnet(
+    #     train_dataset=train_dataset,
+    #     val_dataset=val_dataset,
+    #     result_path='SAGE.xlsx',
+    #     model_path='uvnet_sage.pth',
+    #     gnn=SAGE()) 
+    # train_uvnet(    
+    #     train_dataset=train_dataset,
+    #     val_dataset=val_dataset,
+    #     result_path='GAT.xlsx',
+    #     model_path='uvnet_gat.pth',
+    #     gnn=GAT())
+    import os
+    dir_path = 'data/step'
+    file_count = len([f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))])
+    print(f"Number of files in {dir_path}: {file_count}")
+    print(f"Train File Count: {file_count * 0.8}")  
+    print(f"Validation File Count: {file_count * 0.2}") 
