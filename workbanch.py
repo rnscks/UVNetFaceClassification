@@ -1,7 +1,10 @@
+import random
 from typing import List
 
 from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir
 from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeCone, BRepPrimAPI_MakeBox
+from OCC.Core.BRepFilletAPI import BRepFilletAPI_MakeChamfer
+from OCC.Core.BRepFilletAPI import BRepFilletAPI_MakeFillet
 from OCC.Core.BRepAlgoAPI import BRepAlgoAPI_Fuse, BRepAlgoAPI_Cut
 from OCC.Core.BRepAdaptor import BRepAdaptor_Curve
 from OCC.Core.TopoDS import TopoDS_Shape, TopoDS_Edge
@@ -128,13 +131,101 @@ class ChamferingRoundingGenerator:
     def __init__(self,
                  stock_shape: TopoDS_Shape):
         self.stock_shape: TopoDS_Shape = stock_shape
-
-
-    def chamfer(self, radius: float, index: int) -> TopoDS_Shape:
-        return NotImplementedError()
+        self.circular_edges: List[tuple[TopoDS_Edge, float, float]] = self._find_circular_edges()
     
-    def round(self, radius: float, index: int) -> TopoDS_Shape:
-        return NotImplementedError()
+    def _find_circular_edges(self) -> List[tuple[TopoDS_Edge, float, float]]:
+        circular_edges = []
+        edge_explorer = TopExp_Explorer(self.stock_shape, TopAbs_EDGE)
+        
+        while edge_explorer.More():
+            edge = edge_explorer.Current()
+            edge_explorer.Next()
+            
+            curve_adaptor = BRepAdaptor_Curve(edge)
+            
+            if curve_adaptor.GetType() == GeomAbs_Circle:
+                circle = curve_adaptor.Circle()
+                center = circle.Location()
+                radius = circle.Radius()
+                circular_edges.append((edge, center.Z(), radius))
+        
+        circular_edges.sort(key=lambda x: (x[1], x[2]))
+        print (f' {len(circular_edges)}')
+        return circular_edges
+    
+    def _apply_random_operation(self, radius: float, operation_type: str) -> TopoDS_Shape:
+        if not self.circular_edges:
+            return self.stock_shape
+        
+        attempted_indices = []
+        while len(attempted_indices) < len(self.circular_edges):
+            available_indices = [i for i in range(len(self.circular_edges)) if i not in attempted_indices]
+            index = random.choice(available_indices)
+            attempted_indices.append(index)
+            target_edge = self.circular_edges[index][0]
+            
+            try:
+                if operation_type == "chamfer":
+                    maker = BRepFilletAPI_MakeChamfer(self.stock_shape)
+                    maker.Add(radius, target_edge)
+                elif operation_type == "round":
+                    maker = BRepFilletAPI_MakeFillet(self.stock_shape)
+                    maker.Add(radius, target_edge)
+                else:
+                    raise ValueError(f"Invalid operation type: {operation_type}")
+                
+                maker.Build()
+                if maker.IsDone():
+                    self.stock_shape = maker.Shape()
+                    self.circular_edges = self._find_circular_edges()
+                    return self.stock_shape
+            except:
+                continue
+        
+        return self.stock_shape
+    
+    def _apply_operation_by_index(self, radius: float, operation_type: str, index: int) -> TopoDS_Shape:
+        if index < 0 or index >= len(self.circular_edges):
+            raise ValueError(f"Invalid index {index}. Available indices: 0 to {len(self.circular_edges)-1}")
+        
+        target_edge = self.circular_edges[index][0]
+        
+        try:
+            if operation_type == "chamfer":
+                maker = BRepFilletAPI_MakeChamfer(self.stock_shape)
+                maker.Add(radius, target_edge)
+            elif operation_type == "round":
+                maker = BRepFilletAPI_MakeFillet(self.stock_shape)
+                maker.Add(radius, target_edge)
+            else:
+                raise ValueError("Invalid operation type")
+            
+            maker.Build()
+            
+            if maker.IsDone():
+                self.stock_shape = maker.Shape()
+                self.circular_edges = self._find_circular_edges()
+                print(f"{operation_type.capitalize()} applied to edge at index {index}")
+                return self.stock_shape
+            else:
+                print(f"Warning: Edge at index {index} is not suitable for {operation_type}")
+                return self.stock_shape
+                
+        except:
+            print(f"Warning: Edge at index {index} is not suitable for {operation_type}")
+            return self.stock_shape
+        
+    def chamfer(self, radius: float, index: int = None) -> TopoDS_Shape:
+        if index is not None:
+            return self._apply_operation_by_index(radius, "chamfer", index)
+        else:
+            return self._apply_random_operation(radius, "chamfer")
+        
+    def round(self, radius: float, index: int = None) -> TopoDS_Shape:
+        if index is not None:
+            return self._apply_operation_by_index(radius, "round", index)
+        else:
+            return self._apply_random_operation(radius, "round")
 
 if __name__ == "__main__":
     from OCC.Display.SimpleGui import init_display
@@ -152,6 +243,12 @@ if __name__ == "__main__":
     turning_shape_generator.grooving(3.0, 0.5, 2.0)
     turning_shape_generator.step(9.0, 1.0, 3.0)
     ret = turning_shape_generator.step(8.0, 2.0, 3.0)
+
+    chamfer_round_generator = ChamferingRoundingGenerator(ret)
+    chamfer_round_generator.chamfer(0.2, 28)
+    chamfer_round_generator.round(0.4, 14)
+    ret= chamfer_round_generator.stock_shape
+
     display, start_display, add_menu, add_function_to_menu = init_display()
     display.DisplayShape(ret, update=True)
     display.FitAll()
