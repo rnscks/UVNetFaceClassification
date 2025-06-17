@@ -1,5 +1,5 @@
 import random
-from typing import List, Tuple
+from typing import List, Tuple, Set
 
 from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir
 from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeCone, BRepPrimAPI_MakeBox
@@ -136,21 +136,22 @@ class ChamferingRoundingGenerator:
     def _find_circular_edges(self) -> List[Tuple[TopoDS_Edge, float, float]]:
         circular_edges = []
         edge_explorer = TopExp_Explorer(self.stock_shape, TopAbs_EDGE)
-        
+        z_radius_map: Set[Tuple[float ,float]] = set()
         while edge_explorer.More():
             edge = edge_explorer.Current()
             edge_explorer.Next()
-            
             curve_adaptor = BRepAdaptor_Curve(edge)
             
             if curve_adaptor.GetType() == GeomAbs_Circle:
                 circle = curve_adaptor.Circle()
-                center = circle.Location()
+                z = circle.Location().Z()
                 radius = circle.Radius()
-                circular_edges.append((edge, center.Z(), radius))
+                if (radius, z) in z_radius_map: 
+                    continue    
+                z_radius_map.add((radius, z))
+                circular_edges.append((edge, z, radius))
         
         circular_edges.sort(key=lambda x: (x[1], x[2]))
-        print (f' {len(circular_edges)}')
         return circular_edges
     
     def _apply_operation_by_index(self, radius: float, operation_type: str, index: int) -> TopoDS_Shape:
@@ -174,7 +175,6 @@ class ChamferingRoundingGenerator:
             if maker.IsDone():
                 self.stock_shape = maker.Shape()
                 self.circular_edges = self._find_circular_edges()
-                print(f"{operation_type.capitalize()} applied to edge at index {index}")
                 return self.stock_shape
             else:
                 print(f"Warning: Edge at index {index} is not suitable for {operation_type}")
