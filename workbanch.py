@@ -1,10 +1,8 @@
-import random
-from typing import List
+from typing import List, Tuple
 
 from OCC.Core.gp import gp_Ax2, gp_Pnt, gp_Dir
 from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeCone, BRepPrimAPI_MakeBox
-from OCC.Core.BRepFilletAPI import BRepFilletAPI_MakeChamfer
-from OCC.Core.BRepFilletAPI import BRepFilletAPI_MakeFillet
+from OCC.Core.BRepFilletAPI import BRepFilletAPI_MakeChamfer, BRepFilletAPI_MakeFillet
 from OCC.Core.BRepAlgoAPI import BRepAlgoAPI_Fuse, BRepAlgoAPI_Cut
 from OCC.Core.BRepAdaptor import BRepAdaptor_Curve
 from OCC.Core.TopoDS import TopoDS_Shape, TopoDS_Edge
@@ -133,7 +131,7 @@ class ChamferingRoundingGenerator:
         self.stock_shape: TopoDS_Shape = stock_shape
         self.circular_edges: List[tuple[TopoDS_Edge, float, float]] = self._find_circular_edges()
     
-    def _find_circular_edges(self) -> List[tuple[TopoDS_Edge, float, float]]:
+    def _find_circular_edges(self) -> List[Tuple[TopoDS_Edge, float, float]]:
         circular_edges = []
         edge_explorer = TopExp_Explorer(self.stock_shape, TopAbs_EDGE)
         
@@ -150,39 +148,7 @@ class ChamferingRoundingGenerator:
                 circular_edges.append((edge, center.Z(), radius))
         
         circular_edges.sort(key=lambda x: (x[1], x[2]))
-        print (f' {len(circular_edges)}')
         return circular_edges
-    
-    def _apply_random_operation(self, radius: float, operation_type: str) -> TopoDS_Shape:
-        if not self.circular_edges:
-            return self.stock_shape
-        
-        attempted_indices = []
-        while len(attempted_indices) < len(self.circular_edges):
-            available_indices = [i for i in range(len(self.circular_edges)) if i not in attempted_indices]
-            index = random.choice(available_indices)
-            attempted_indices.append(index)
-            target_edge = self.circular_edges[index][0]
-            
-            try:
-                if operation_type == "chamfer":
-                    maker = BRepFilletAPI_MakeChamfer(self.stock_shape)
-                    maker.Add(radius, target_edge)
-                elif operation_type == "round":
-                    maker = BRepFilletAPI_MakeFillet(self.stock_shape)
-                    maker.Add(radius, target_edge)
-                else:
-                    raise ValueError(f"Invalid operation type: {operation_type}")
-                
-                maker.Build()
-                if maker.IsDone():
-                    self.stock_shape = maker.Shape()
-                    self.circular_edges = self._find_circular_edges()
-                    return self.stock_shape
-            except:
-                continue
-        
-        return self.stock_shape
     
     def _apply_operation_by_index(self, radius: float, operation_type: str, index: int) -> TopoDS_Shape:
         if index < 0 or index >= len(self.circular_edges):
@@ -205,27 +171,18 @@ class ChamferingRoundingGenerator:
             if maker.IsDone():
                 self.stock_shape = maker.Shape()
                 self.circular_edges = self._find_circular_edges()
-                print(f"{operation_type.capitalize()} applied to edge at index {index}")
                 return self.stock_shape
             else:
-                print(f"Warning: Edge at index {index} is not suitable for {operation_type}")
                 return self.stock_shape
                 
         except:
-            print(f"Warning: Edge at index {index} is not suitable for {operation_type}")
             return self.stock_shape
         
-    def chamfer(self, radius: float, index: int = None) -> TopoDS_Shape:
-        if index is not None:
-            return self._apply_operation_by_index(radius, "chamfer", index)
-        else:
-            return self._apply_random_operation(radius, "chamfer")
+    def chamfer(self, radius: float, index: int) -> TopoDS_Shape:
+        return self._apply_operation_by_index(radius, "chamfer", index)
         
-    def round(self, radius: float, index: int = None) -> TopoDS_Shape:
-        if index is not None:
-            return self._apply_operation_by_index(radius, "round", index)
-        else:
-            return self._apply_random_operation(radius, "round")
+    def round(self, radius: float, index: int ) -> TopoDS_Shape:
+        return self._apply_operation_by_index(radius, "round", index)
 
 if __name__ == "__main__":
     from OCC.Display.SimpleGui import init_display
