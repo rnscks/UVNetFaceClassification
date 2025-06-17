@@ -123,7 +123,6 @@ class TurningMainShapeGenerator:
         else:
             raise RuntimeError("Failed to perform fuse operation")  
 
-
 class ChamferingRoundingGenerator:
     def __init__(self,
                  stock_shape: TopoDS_Shape):
